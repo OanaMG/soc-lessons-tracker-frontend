@@ -4,29 +4,29 @@ import HomePage from '../HomePage';
 import AddEntryPage from '../AddEntryPage';
 import ViewEntryPage from '../ViewEntryPage';
 import EditEntryPage from '../EditEntryPage';
-import AuthButton from '../AuthButton';
+import AuthNav from '../AuthNav';
+import ProtectedRoute from '../../auth/ProtectedRoute';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { AuthProvider } from "../../authContext";
-
 import {Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator} from "@chakra-ui/react";
+import { ChevronRightIcon } from '@chakra-ui/icons'
+
 
 
 function App() {
   return (
-    <AuthProvider>
       <Router>
-        <AuthButton/>
-
-        <Breadcrumb separator="-">
-          <BreadcrumbItem>
+        <div className="App">
+          <div className="NavBar">
+        <Breadcrumb separator={<ChevronRightIcon color="gray.500" />}>
+          {/* <BreadcrumbItem>
             <BreadcrumbLink as={Link} to="/">
               Landing Page
             </BreadcrumbLink>
-          </BreadcrumbItem>
+          </BreadcrumbItem> */}
 
           <BreadcrumbItem>
             <BreadcrumbLink as={Link} to="/home">
-              Home0
+              Home
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -48,31 +48,20 @@ function App() {
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
-
+        </div>
+        <div className="authNav">
+        <AuthNav/>
+          </div>
         <Switch>
-          <Route path="/home">
-              <HomePage/>
-          </Route>
-
-          <Route path="/add-entry">
-              <AddEntryPage/>
-          </Route>
-
-          <Route path="/view-entry">
-              <ViewEntryPage/>
-          </Route>
-
-          <Route path="/edit-entry">
-              <EditEntryPage/>
-          </Route>
-
-          <Route path="/">
-              <LandingPage/>
-          </Route>
+          <ProtectedRoute path="/home" component={HomePage}/>
+          <ProtectedRoute path="/add-entry" component={AddEntryPage}/>
+          <ProtectedRoute path="/view-entry" component={ViewEntryPage}/>
+          <ProtectedRoute path="/edit-entry" component={EditEntryPage}/>
+          <Route path="/" exact component={LandingPage}/>
         </Switch>
-
+        </div>
       </Router>
-    </AuthProvider>
+
   );
 }
 

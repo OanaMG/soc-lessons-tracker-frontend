@@ -1,3 +1,24 @@
 .App {
-  text-align: center;
+  margin: 0;
+  padding: 0;
+  padding-top: 1%;
+  min-height: 100vh;
+  min-width: 100vw;
+  /* background-color: rgb(133, 172, 190); */
+  position: fixed;  
+  color: white;
+  background-color: black;
+}
+
+.authNav{
+  display: inline-block;
+  padding-left: 1%;
+  padding-bottom: 1%;
+  justify-content: space-around;
+}
+
+.NavBar{
+  display: inline-block;
+  padding-left: 70%;
+  padding-bottom: 1%;
 }
