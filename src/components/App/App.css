@@ -4,7 +4,6 @@
   padding-top: 1%;
   min-height: 100vh;
   min-width: 100vw;
-  /* background-color: rgb(133, 172, 190); */
   position: fixed;  
   color: white;
   background-color: black;
@@ -13,12 +12,20 @@
 .authNav{
   display: inline-block;
   padding-left: 1%;
+  padding-right: 1%;
   padding-bottom: 1%;
-  justify-content: space-around;
+  /* justify-content: space-around;
+  align-self: flex-start; */
 }
 
 .NavBar{
   display: inline-block;
-  padding-left: 70%;
+  /* align-self: flex-end; */
+  padding-right: 1%;
   padding-bottom: 1%;
+}
+
+.Header {
+  display: flex;
+  justify-content: space-between;
 }

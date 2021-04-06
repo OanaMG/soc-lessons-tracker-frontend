@@ -16,49 +16,46 @@ function App() {
   return (
       <Router>
         <div className="App">
-          <div className="NavBar">
-        <Breadcrumb separator={<ChevronRightIcon color="gray.500" />}>
-          {/* <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/">
-              Landing Page
-            </BreadcrumbLink>
-          </BreadcrumbItem> */}
+          <div className="Header">
+            <div className="authNav">
+              <AuthNav/>
+            </div>
 
-          <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/home">
-              Home
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+            <div className="NavBar">
+              <Breadcrumb separator={<ChevronRightIcon color="gray.500" />}>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink as={Link} to="/home">
+                      Home
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
 
-          <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/add-entry">
-              Add Entry
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink as={Link} to="/add-entry">
+                      Add Entry
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
 
-          <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/view-entry">
-              View Entry
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          
-          <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/edit-entry">
-              Edit Entry
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
-        </div>
-        <div className="authNav">
-        <AuthNav/>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink as={Link} to="/view-entry">
+                      View Entry
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  
+                  <BreadcrumbItem>
+                    <BreadcrumbLink as={Link} to="/edit-entry">
+                      Edit Entry
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+              </Breadcrumb>
+            </div>
           </div>
-        <Switch>
-          <ProtectedRoute path="/home" component={HomePage}/>
-          <ProtectedRoute path="/add-entry" component={AddEntryPage}/>
-          <ProtectedRoute path="/view-entry" component={ViewEntryPage}/>
-          <ProtectedRoute path="/edit-entry" component={EditEntryPage}/>
-          <Route path="/" exact component={LandingPage}/>
-        </Switch>
+          <Switch>
+            <ProtectedRoute path="/home" component={HomePage}/>
+            <ProtectedRoute path="/add-entry" component={AddEntryPage}/>
+            <ProtectedRoute path="/view-entry" component={ViewEntryPage}/>
+            <ProtectedRoute path="/edit-entry" component={EditEntryPage}/>
+            <Route path="/" exact component={LandingPage}/>
+          </Switch>
         </div>
       </Router>
 
