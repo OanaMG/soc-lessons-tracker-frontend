@@ -8,20 +8,20 @@ import AuthNav from '../AuthNav';
 import ProtectedRoute from '../../auth/ProtectedRoute';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import {Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator} from "@chakra-ui/react";
-import { ChevronRightIcon } from '@chakra-ui/icons'
-
+import { ChevronRightIcon } from '@chakra-ui/icons';
+import css from './app.module.css';
 
 
 function App() {
   return (
       <Router>
-        <div className="App">
-          <div className="Header">
-            <div className="authNav">
+        <div className={css.app}>
+          <div className={css.header}>
+            <div className={css.authNav}>
               <AuthNav/>
             </div>
 
-            <div className="NavBar">
+            <div className={css.navBar}>
               <Breadcrumb separator={<ChevronRightIcon color="gray.500" />}>
                   <BreadcrumbItem>
                     <BreadcrumbLink as={Link} to="/home">
