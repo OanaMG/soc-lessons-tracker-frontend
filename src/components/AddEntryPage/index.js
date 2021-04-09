@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import css from "./addEntryPage.module.css";
 import {
   Heading,
@@ -14,10 +14,12 @@ import UserProfile from "../UserProfile";
 import EntryForm from "../EntryForm";
 import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
 import { useAuth0 } from "@auth0/auth0-react";
-import UploadDocuments from '../UploadDocuments';
 
 function AddEntryPage() {
   const { user } = useAuth0();
+
+  const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
+  // console.log("Files path from addEntry: " + uploadedFilesPath);
 
   useEffect(() => {
     async function getEntries() {
@@ -91,6 +93,7 @@ function AddEntryPage() {
         AdditionalNotes: formData.additionalNotes,
         RecapQuizScore: formData.score,
         Token: token,
+        UploadedDocuments: uploadedFilesPath,  //to replace with uploadedFilesPath
       }),
     };
     fetch(`${BACKEND_URL_DAILY_ENTRIES}`, requestOptions);
@@ -132,7 +135,7 @@ function AddEntryPage() {
           display="flex"
           flexFlow="column-wrap"
         >
-          <EntryForm postBooking={postBooking} token={user.sub} />
+          <EntryForm postBooking={postBooking} token={user.sub} uploadedFilesPath={uploadedFilesPath} setUploadedFilesPath={setUploadedFilesPath}/>
         </HStack>
       </Stack>
     </div>

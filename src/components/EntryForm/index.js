@@ -1,29 +1,17 @@
 import { useForm, Controller } from "react-hook-form";
 import React, { useState } from "react";
 import S3 from "react-aws-s3";
-
-import {
-  FormErrorMessage,
-  FormLabel,
-  FormControl,
-  Input,
-  Button,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  NumberInput,
-  NumberInputField,
-  Textarea,
-  Box,
-} from "@chakra-ui/react";
+import { FormErrorMessage,FormLabel, FormControl, Input, Button, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, NumberInput, NumberInputField, Textarea, Box} from "@chakra-ui/react";
 import DatePicker from "react-datepicker"; //if needed we can also import register locale
 import "react-datepicker/dist/react-datepicker.css";
 import { startOfDay } from "date-fns"; //if needed we can also import format, parseISO
 
-function EntryForm({ postBooking, token }) {
+function EntryForm({ postBooking, token, uploadedFilesPath, setUploadedFilesPath }) {
   const { handleSubmit, errors, register, control, formState } = useForm(); //initially was just form state
   const fileInput = React.useRef();
-  const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
+  const [testPath, setTestPath] = useState([]);
+
+  var locations = [];
 
   const config = {
     bucketName: process.env.REACT_APP_AWS_BUCKET_NAME,
@@ -40,13 +28,20 @@ function EntryForm({ postBooking, token }) {
     }
   };
 
+  console.log(testPath);
+
   const handleUpload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
     const ReactS3Client = new S3(config);
     ReactS3Client.uploadFile(file, newFileName).then((data) => {
       if (data.status === 204) {
         console.log("success");
-        setUploadedFilesPath([...uploadedFilesPath, data.location]);
+        // setUploadedFilesPath([...uploadedFilesPath, data.location]);
+        locations.push(data.location);
+        setUploadedFilesPath([...locations]);
+        console.log(testPath);
+        console.log(data);
+        //console.log(data.location);
       } else {
         console.log("fail");
       }
@@ -160,7 +155,7 @@ function EntryForm({ postBooking, token }) {
 
         <FormControl>
           <FormLabel>Upload Documents</FormLabel>
-          <Input type="file" multiple ref={fileInput}/>
+          <Input type="file" multiple ref={fileInput} size="md" width="min-content"/>
         </FormControl>
 
         <Button
