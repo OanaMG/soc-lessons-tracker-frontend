@@ -14,6 +14,7 @@ import UserProfile from "../UserProfile";
 import EntryForm from "../EntryForm";
 import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
 import { useAuth0 } from "@auth0/auth0-react";
+import UploadDocuments from '../UploadDocuments';
 
 function AddEntryPage() {
   const { user } = useAuth0();

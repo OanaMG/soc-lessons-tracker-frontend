@@ -1,5 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
-import React from "react";
+import React, { useState } from "react";
+import S3 from "react-aws-s3";
+
 import {
   FormErrorMessage,
   FormLabel,
@@ -20,6 +22,36 @@ import { startOfDay } from "date-fns"; //if needed we can also import format, pa
 
 function EntryForm({ postBooking, token }) {
   const { handleSubmit, errors, register, control, formState } = useForm(); //initially was just form state
+  const fileInput = React.useRef();
+  const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
+
+  const config = {
+    bucketName: process.env.REACT_APP_AWS_BUCKET_NAME,
+    region: process.env.REACT_APP_AWS_REGION,
+    accessKeyId: process.env.REACT_APP_AWS_ID,
+    secretAccessKey: process.env.REACT_APP_AWS_KEY,
+  };
+
+  const handleClick = (event) => {
+    event.preventDefault();
+    let newArr = fileInput.current.files;
+    for (let i = 0; i < newArr.length; i++) {
+      handleUpload(newArr[i]);
+    }
+  };
+
+  const handleUpload = (file) => {
+    let newFileName = file.name.replace(/\..+$/, "");
+    const ReactS3Client = new S3(config);
+    ReactS3Client.uploadFile(file, newFileName).then((data) => {
+      if (data.status === 204) {
+        console.log("success");
+        setUploadedFilesPath([...uploadedFilesPath, data.location]);
+      } else {
+        console.log("fail");
+      }
+    });
+  };
 
   function validateName(value) {
     if (!value) {
@@ -29,7 +61,9 @@ function EntryForm({ postBooking, token }) {
     } else return true;
   }
 
-  function onSubmit(values) {
+  function onSubmit(values, event) {
+    handleClick(event);
+    // handleClick();
     postBooking(values, token);
     console.log(values);
   }
@@ -126,6 +160,7 @@ function EntryForm({ postBooking, token }) {
 
         <FormControl>
           <FormLabel>Upload Documents</FormLabel>
+          <Input type="file" multiple ref={fileInput}/>
         </FormControl>
 
         <Button
