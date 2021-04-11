@@ -1,7 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
 import React, { useState } from "react";
 import S3 from "react-aws-s3";
-import { FormErrorMessage, FormLabel, FormControl, Input, Button, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, NumberInput, NumberInputField, Textarea, Box} from "@chakra-ui/react";
+import { FormErrorMessage, FormLabel, FormControl, FormHelperText, Input, Button, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, NumberInput, NumberInputField, Textarea, Box} from "@chakra-ui/react";
 import DatePicker from "react-datepicker"; //if needed we can also import register locale
 import "react-datepicker/dist/react-datepicker.css";
 import { startOfDay } from "date-fns"; //if needed we can also import format, parseISO
@@ -128,7 +128,7 @@ function EntryForm({ token }) {
           </NumberInput>
         </FormControl>  */}
 
-        <FormControl>
+        {/* <FormControl>
           <FormLabel>Daily Recap Quiz Score</FormLabel>
           <Input
             type="number"
@@ -136,6 +136,19 @@ function EntryForm({ token }) {
             ref={register({ required: false })}
             width="3xs"
             placeholder="Enter score"/>
+        </FormControl> */}
+
+          <FormControl>
+          <FormLabel>Daily Quiz Score</FormLabel>
+          <Input
+            name="recapQuizScore"
+            type="number"
+            min={0}
+            max={10}
+            size="md"
+            ref={register({ required: false })}
+            placeholder="Enter quiz score"
+          />
         </FormControl>
 
         <FormControl isRequired>
@@ -185,7 +198,7 @@ function EntryForm({ token }) {
           <Button rightIcon={<FaCloudUploadAlt />} size="sm" colorScheme="blue" variant="outline" onClick={handleClick}>
             Upload files
           </Button>
-
+          <FormHelperText>If you have chosen to upload documents, don't forget to press the Upload Files before submitting the form!</FormHelperText>
         </FormControl>
 
         <Button
