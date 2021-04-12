@@ -1,21 +1,37 @@
 import { useForm, Controller } from "react-hook-form";
 import React, { useState } from "react";
 import S3 from "react-aws-s3";
-import { FormErrorMessage, FormLabel, FormControl, FormHelperText, Input, Button, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, NumberInput, NumberInputField, Textarea, Box} from "@chakra-ui/react";
+import {
+  FormErrorMessage,
+  FormLabel,
+  FormControl,
+  FormHelperText,
+  Input,
+  Button,
+  Textarea,
+  Box,
+} from "@chakra-ui/react";
 import DatePicker from "react-datepicker"; //if needed we can also import register locale
 import "react-datepicker/dist/react-datepicker.css";
 import { startOfDay } from "date-fns"; //if needed we can also import format, parseISO
 import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
 import { useAuth0 } from "@auth0/auth0-react";
-import {FaCloudUploadAlt} from 'react-icons/fa';
-
+import { FaCloudUploadAlt } from "react-icons/fa";
+import FormAlertBox from "../FormAlertBox";
 
 function EntryForm({ token }) {
   const { handleSubmit, errors, register, control, formState } = useForm(); //initially was just form state
   const fileInput = React.useRef();
   const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
-
   var locations = [];
+
+  const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const [isSuccessfulOpen, setIsSuccessfulOpen] = useState(false);
+  const onClose = () => {
+    setIsSuccessfulOpen(false);
+    setIsErrorOpen(false);
+  };
+  const cancelRef = React.useRef();
 
   const config = {
     bucketName: process.env.REACT_APP_AWS_BUCKET_NAME,
@@ -62,83 +78,66 @@ function EntryForm({ token }) {
 
   const formatDate = (date) => {
     if (date !== undefined) {
-      return ((date.slice(8,10)).concat(`-${date.slice(5,7)}-${date.slice(0,4)}`));
+      return date
+        .slice(8, 10)
+        .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
     }
   };
 
   function onSubmit(values, event) {
     console.log(values);
     postBooking(values);
-    event.target.reset();   //date is refreshed if using input type date
-    // window.location.reload();
-
+    event.target.reset();
   }
 
   const postBooking = (formData) => {
-    console.log("in post booking"+ uploadedFilesPath)
+    console.log("in post booking" + uploadedFilesPath);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formatDate(formData.date), //formData.date, 
+        Date: formatDate(formData.date), //formData.date,
         Topics: formData.topics,
         NotionLinks: formData.linkNotion,
         AdditionalResourcesLinks: formData.linkUsefulResources, //parseInt(formData.number)
         AdditionalNotes: formData.additionalNotes,
         RecapQuizScore: formData.score,
         Token: token,
-        UploadedDocuments: uploadedFilesPath, 
+        UploadedDocuments: uploadedFilesPath,
       }),
     };
-    fetch(`${BACKEND_URL_DAILY_ENTRIES}`, requestOptions);
+
+    fetch(`${BACKEND_URL_DAILY_ENTRIES}`, requestOptions)
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        }
+        throw new Error("Something went wrong.");
+      })
+      .then(function (text) {
+        console.log("Request successful", text);
+        setIsSuccessfulOpen(true);
+      })
+      .catch(function (error) {
+        console.log("Request failed", error);
+        setIsErrorOpen(true);
+      });
   };
-  
+
   return (
     <Box width="100%">
-    <form onSubmit={handleSubmit(onSubmit)}> 
-        {/* <FormControl isInvalid={errors.name}>
-        <FormLabel htmlFor="name">First name</FormLabel>
-        <Input
-          name="name"
-          placeholder="name"
-          ref={register({ validate: validateName })}
-        />
-        <FormErrorMessage>
-          {errors.name && errors.name.message}
-        </FormErrorMessage>
-      </FormControl> */}
-
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isRequired>
           <FormLabel>Date</FormLabel>
-          <Input name="date" type="date" ref={register({ required: true })}/>
+          <Input
+            name="date"
+            type="date"
+            width="min-content"
+            ref={register({ required: true })}
+          />
         </FormControl>
 
-        {/* <FormControl>
-          <FormLabel>Daily Recap Quiz Score</FormLabel>
-          <NumberInput min={0} max={10} width="3xs">
-            <NumberInputField
-              name="score"
-              ref={register({ required: false })}
-              placeholder="Enter score"
-            />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-        </FormControl>  */}
-
-        {/* <FormControl>
-          <FormLabel>Daily Recap Quiz Score</FormLabel>
-          <Input
-            type="number"
-            name="score"
-            ref={register({ required: false })}
-            width="3xs"
-            placeholder="Enter score"/>
-        </FormControl> */}
-
-          <FormControl>
+        <FormControl>
           <FormLabel>Daily Quiz Score</FormLabel>
           <Input
             name="recapQuizScore"
@@ -146,8 +145,9 @@ function EntryForm({ token }) {
             min={0}
             max={10}
             size="md"
+            width="min-content"
             ref={register({ required: false })}
-            placeholder="Enter quiz score"
+            placeholder="Score"
           />
         </FormControl>
 
@@ -168,6 +168,16 @@ function EntryForm({ token }) {
             size="md"
             ref={register({ required: false })}
             placeholder="Links to Notion notes or alternative note taking applications eg. https://www.notion.so/Day-27-09-02-21-80fe53a30e254625bab3a9f187936081"
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Link(s) to GitHub Repositories</FormLabel>
+          <Input
+            name="linkGithub"
+            size="md"
+            ref={register({ required: false })}
+            placeholder="Links to relevant GitHub repositories"
           />
         </FormControl>
 
@@ -194,11 +204,26 @@ function EntryForm({ token }) {
 
         <FormControl>
           <FormLabel>Upload Documents</FormLabel>
-          <Input type="file" multiple ref={fileInput} size="md" width="min-content"/>
-          <Button rightIcon={<FaCloudUploadAlt />} size="sm" colorScheme="blue" variant="outline" onClick={handleClick}>
+          <Input
+            type="file"
+            multiple
+            ref={fileInput}
+            size="md"
+            width="min-content"
+          />
+          <Button
+            rightIcon={<FaCloudUploadAlt />}
+            size="sm"
+            colorScheme="blue"
+            variant="outline"
+            onClick={handleClick}
+          >
             Upload files
           </Button>
-          <FormHelperText>If you have chosen to upload documents, don't forget to press the Upload Files before submitting the form!</FormHelperText>
+          <FormHelperText>
+            If you have chosen to upload documents, don't forget to press Upload
+            Files before submitting this entry!
+          </FormHelperText>
         </FormControl>
 
         <Button
@@ -210,6 +235,23 @@ function EntryForm({ token }) {
           Submit
         </Button>
       </form>
+
+      <FormAlertBox
+        cancelRef={cancelRef}
+        onClose={onClose}
+        isOpen={isErrorOpen}
+        headerText="Oops!"
+        bodyText="There's been an issue submitting this entry. Please check, as there might already
+        be an entry added for this date!"
+      />
+
+      <FormAlertBox
+        cancelRef={cancelRef}
+        onClose={onClose}
+        isOpen={isSuccessfulOpen}
+        headerText="Congratulations!"
+        bodyText="This entry has been successfully added and can now be viewed on the View Entry page"
+      />
     </Box>
   );
 }

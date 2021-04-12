@@ -30,8 +30,6 @@ function AddEntryPage2() {
     getEntries();
   }, []);
 
-
-  
   return (
     <div className={css.bg}>
       <Stack
@@ -69,7 +67,10 @@ function AddEntryPage2() {
           flexFlow="column-wrap"
           width="100%"
         >
-          <EntryForm token={user.sub}/>
+          <VStack width="100%">
+            <Heading size="lg">Add Daily Entry</Heading>
+            <EntryForm token={user.sub} />
+          </VStack>
         </HStack>
       </Stack>
     </div>
