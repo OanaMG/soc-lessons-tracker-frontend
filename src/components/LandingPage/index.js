@@ -1,6 +1,6 @@
 import React from 'react';
 import css from './landingPage.module.css';
-import { Button, Flex, Heading, VStack } from "@chakra-ui/react"
+import {Heading, VStack } from "@chakra-ui/react"
 import LoginButton from '../LoginButton';
 
 

@@ -1,37 +1,44 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import UserProfile from '../UserProfile';
 import css from './homePage.module.css';
-import { Heading, HStack, VStack, Input, Stack, ListItem, UnorderedList, SimpleGrid} from "@chakra-ui/react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Label, Tooltip, Legend} from 'recharts';
+import { Heading, HStack, VStack, Input, Stack, UnorderedList, Grid, GridItem} from "@chakra-ui/react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 import EntriesTable from '../EntriesTable';
-import EntriesTable2 from '../EntriesTable2';
-
-
+import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function HomePage() {
+    const [entries, setEntries] = useState([]);
     const [search, setSearch] = useState("");
+    const [searchEntries, setSearchEntries] = useState(entries);
+    const { user } = useAuth0();
+    //!!! working with just the part after | in the auth0 token
+    console.log(user.sub);
+    console.log((user.sub).slice(6,(user.sub).length));
+    //console.log();
 
-    var notes = [{date: "14/06/20", topic: "router, react-router", score: 7},
-                {date: "15/06/20", topic: "css, tailwind", score: 9},
-                {date: "16/06/20", topic: "heroku, cloud deployment", score: 8},
-                {date: "17/06/20", topic: "array methods, map function", score: 10},
-                {date: "18/06/20", topic: "heroku, cloud deployment", score: 8},
-                {date: "19/06/20", topic: "heroku, cloud deployment", score: 5},
-                {date: "20/06/20", topic: "heroku, cloud deployment", score: 9},
-                {date: "21/06/20", topic: "heroku, cloud deployment", score: 7},
-                {date: "22/06/20", topic: "css, tailwind", score: 9},
-                {date: "23/06/20", topic: "heroku, cloud deployment", score: 8},
-                {date: "24/06/20", topic: "array methods, map function", score: 10},
-                {date: "25/06/20", topic: "heroku, cloud deployment", score: 8},
-                {date: "26/06/20", topic: "heroku, cloud deployment", score: 5},
-                {date: "27/06/20", topic: "heroku, cloud deployment", score: 9},
-                {date: "28/06/20", topic: "heroku, cloud deployment", score: 7}
-            ];
-    
-    var testDates = ["14/06/20", "20/06/20", "28/06/20", "14/06/20", "20/06/20", "28/06/20", "14/06/20", "20/06/20", "28/06/20", "14/06/20", "20/06/20", "28/06/20", "14/06/20", "20/06/20", "28/06/20", "14/06/20", "20/06/20", "28/06/20"]
+    useEffect(() => {
+        getUserEntries();
+    }, []);
 
-    console.log(notes);
+    useEffect(() => {
+        getSearchedEntries();
+    }, [search]);
 
+    async function getUserEntries() {
+        let response = await fetch(`${BACKEND_URL_DAILY_ENTRIES}?token=${((user.sub).slice(6,(user.sub).length))}`);
+        let data = await response.json();
+        setEntries(data);
+        //console.log(data);
+    }
+
+    async function getSearchedEntries() {
+        let response = await fetch(`${BACKEND_URL_DAILY_ENTRIES}?token=${((user.sub).slice(6,(user.sub).length))}&search=${search}`);
+        let data = await response.json();
+        setSearchEntries(data);
+        //console.log(data);
+    }
+      
     function searchTopic(e) {
         setSearch(e.target.value);
         console.log(search);
@@ -54,9 +61,7 @@ function HomePage() {
                 <HStack alignItems="flex-start" justifyContent="space-around" display="flex" flexFlow="column-wrap">
                     <VStack display="flex">
                         <Heading size="md">Overview</Heading>
-
-                        {/* <EntriesTable data={notes}/> */}
-                        <EntriesTable2 data={notes}/>
+                        <EntriesTable data={entries}/>
                     </VStack>
 
                     <VStack display="flex" spacing="5%">
@@ -75,7 +80,7 @@ function HomePage() {
                             </XAxis>
                             <YAxis type="number" domain={[0,10]}/> */}
 
-                            <LineChart width={730} height={250} data={notes} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                            <LineChart width={730} height={250} data={entries} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="date" >
                                     {/* <Label value="Date" position="bottom" offset={0}/> */}
@@ -83,19 +88,19 @@ function HomePage() {
                                 <YAxis />
                                 <Tooltip />
                                 <Legend />
-                                <Line type="monotone" dataKey="score" stroke="#0095FF" />
+                                <Line type="monotone" dataKey="recapQuizScore" stroke="#0095FF" />
                             </LineChart>
                         </VStack>
 
-                        <VStack>
+                        <VStack width="85%" paddingLeft="5%">
                             <Input placeholder="Search by topic" size="sm" width="100%" variant="outline" colorScheme="blue" border="2px" borderColor="blue.500" onChange={searchTopic}/>
                             <UnorderedList styleType="none" overflowY="scroll" height="200px">
-                                {notes.map((item)=> {
+                                {searchEntries.map((item)=> {
                                     return (
-                                        <SimpleGrid columns={2} spacingX="40px" spacingY="20px">
-                                            <ListItem>{item.date}</ListItem>
-                                            <ListItem>{item.topic}</ListItem>
-                                        </SimpleGrid>)
+                                        <Grid templateColumns="repeat(7, 1fr)" gap={10}>
+                                            <GridItem colSpan={2}>{item.date}</GridItem>
+                                            <GridItem colSpan={5}>{item.topics}</GridItem>
+                                        </Grid>)
                                 })}
                             </UnorderedList>
                         </VStack>

@@ -1,15 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import css from "./addEntryPage.module.css";
-import {
-  Heading,
-  HStack,
-  VStack,
-  Input,
-  Stack,
-  ListItem,
-  UnorderedList,
-  SimpleGrid,
-} from "@chakra-ui/react";
+import {Heading, HStack, VStack, Stack,} from "@chakra-ui/react";
 import UserProfile from "../UserProfile";
 import EntryForm from "../EntryForm";
 
@@ -18,7 +9,9 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 function AddEntryPage2() {
   const { user } = useAuth0();
-
+  //!!! working with just the part after | in the auth0 token
+  console.log(user.sub);
+  console.log((user.sub).slice(6,(user.sub).length));
   // console.log("Files path from addEntry: " + uploadedFilesPath);
 
   useEffect(() => {
@@ -69,7 +62,7 @@ function AddEntryPage2() {
         >
           <VStack width="100%">
             <Heading size="lg">Add Daily Entry</Heading>
-            <EntryForm token={user.sub} />
+            <EntryForm token={((user.sub).slice(6,(user.sub).length))} />
           </VStack>
         </HStack>
       </Stack>

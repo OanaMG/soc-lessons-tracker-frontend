@@ -7,7 +7,7 @@ import EditEntryPage from '../EditEntryPage';
 import AuthNav from '../AuthNav';
 import ProtectedRoute from '../../auth/ProtectedRoute';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import {Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator} from "@chakra-ui/react";
+import {Breadcrumb, BreadcrumbItem, BreadcrumbLink} from "@chakra-ui/react";
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import css from './app.module.css';
 

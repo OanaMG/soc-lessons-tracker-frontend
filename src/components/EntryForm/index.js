@@ -1,26 +1,13 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import S3 from "react-aws-s3";
-import {
-  FormErrorMessage,
-  FormLabel,
-  FormControl,
-  FormHelperText,
-  Input,
-  Button,
-  Textarea,
-  Box,
-} from "@chakra-ui/react";
-import DatePicker from "react-datepicker"; //if needed we can also import register locale
-import "react-datepicker/dist/react-datepicker.css";
-import { startOfDay } from "date-fns"; //if needed we can also import format, parseISO
+import { FormLabel, FormControl, FormHelperText, Input, Button, Textarea, Box} from "@chakra-ui/react";
 import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
-import { useAuth0 } from "@auth0/auth0-react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import FormAlertBox from "../FormAlertBox";
 
 function EntryForm({ token }) {
-  const { handleSubmit, errors, register, control, formState } = useForm(); //initially was just form state
+  const { handleSubmit, register, formState } = useForm(); //initially was just form state
   const fileInput = React.useRef();
   const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
   var locations = [];
@@ -54,12 +41,8 @@ function EntryForm({ token }) {
     ReactS3Client.uploadFile(file, newFileName).then((data) => {
       if (data.status === 204) {
         console.log("success");
-        // setUploadedFilesPath([...uploadedFilesPath, data.location]);
         locations.push(data.location);
         setUploadedFilesPath(locations);
-        //console.log(data);
-        //console.log(locations);
-        //console.log(uploadedFilesPath)
       } else {
         console.log("fail");
       }
@@ -96,12 +79,13 @@ function EntryForm({ token }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formatDate(formData.date), //formData.date,
+        Date: formatDate(formData.date),
         Topics: formData.topics,
         NotionLinks: formData.linkNotion,
-        AdditionalResourcesLinks: formData.linkUsefulResources, //parseInt(formData.number)
+        AdditionalResourcesLinks: formData.linkUsefulResources, 
+        GithubLinks: formData.linkGithub, 
         AdditionalNotes: formData.additionalNotes,
-        RecapQuizScore: formData.score,
+        RecapQuizScore: formData.recapQuizScore,
         Token: token,
         UploadedDocuments: uploadedFilesPath,
       }),
@@ -137,6 +121,7 @@ function EntryForm({ token }) {
           />
         </FormControl>
 
+        {/* For some reason the score input is taken as required and not sure why. Needs to be sorted out as the form can't be submitted without a score at the moment */}
         <FormControl>
           <FormLabel>Daily Quiz Score</FormLabel>
           <Input
@@ -203,13 +188,14 @@ function EntryForm({ token }) {
         </FormControl>
 
         <FormControl>
-          <FormLabel>Upload Documents</FormLabel>
+          <FormLabel>Upload Documents (.pdf)</FormLabel>
           <Input
             type="file"
             multiple
             ref={fileInput}
             size="md"
             width="min-content"
+            accept=".pdf"
           />
           <Button
             rightIcon={<FaCloudUploadAlt />}
@@ -228,7 +214,7 @@ function EntryForm({ token }) {
 
         <Button
           mt={4}
-          colorScheme="teal"
+          colorScheme="blue"
           isLoading={formState.isSubmitting}
           type="submit"
         >
