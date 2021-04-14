@@ -2,8 +2,8 @@ import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import LoginButton from '../LoginButton';
 import LogoutButton from '../LogoutButton';
-import UserProfile from '../UserProfile';
-import SignupButton from '../SignupButton';
+//import UserProfile from '../UserProfile';
+//import SignupButton from '../SignupButton';
 
 
 function AuthenticationButton() {
