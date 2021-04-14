@@ -19,10 +19,12 @@ function HomePage() {
 
     useEffect(() => {
         getUserEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         getSearchedEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     async function getUserEntries() {

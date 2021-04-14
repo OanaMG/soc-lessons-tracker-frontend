@@ -51,14 +51,6 @@ function EntryForm({ token }) {
 
   console.log(uploadedFilesPath);
 
-  function validateName(value) {
-    if (!value) {
-      return "Name is required";
-    } else if (value !== "Naruto") {
-      return "Jeez! You're not a fan 😱";
-    } else return true;
-  }
-
   const formatDate = (date) => {
     if (date !== undefined) {
       return date
