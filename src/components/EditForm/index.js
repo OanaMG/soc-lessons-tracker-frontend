@@ -37,14 +37,7 @@ function EditForm({ token }) {
   // const { user } = useAuth0();
   const [entryDate, setEntryDate] = useState("");
 
-  const formatDate = (date) => {
-    if (date !== undefined) {
-      return date
-        .slice(8, 10)
-        .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
-    }
-  };
-
+ 
   console.log(entryDate);
 
   //!! Change to use reducer
@@ -63,9 +56,7 @@ function EditForm({ token }) {
   async function getEntryByDate() {
     if (entryDate !== undefined) {
       let response = await fetch(
-        `${BACKEND_URL_DAILY_ENTRIES}?token=${token}&date=${formatDate(
-          entryDate
-        )}`
+        `${BACKEND_URL_DAILY_ENTRIES}?token=${token}&date=${entryDate}`
       );
       let data = await response.json();
       console.log(data);
@@ -126,7 +117,7 @@ function EditForm({ token }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formatDate(formData.date),
+        Date: formData.date,
         Topics: formData.topics,
         NotionLinks: formData.linkNotion,
         AdditionalResourcesLinks: formData.linkUsefulResources,
@@ -143,7 +134,7 @@ function EditForm({ token }) {
     if (entryDate !== null && entryDate !== "") {
       setIsDisabled(false);
       getEntryByDate();
-      console.log("date selected " + formatDate(entryDate));
+      console.log("date selected " + entryDate);
     } else {
       console.log("no date added");
     }

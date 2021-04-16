@@ -51,13 +51,13 @@ function EntryForm({ token }) {
 
   console.log(uploadedFilesPath);
 
-  const formatDate = (date) => {
-    if (date !== undefined) {
-      return date
-        .slice(8, 10)
-        .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
-    }
-  };
+  // const formatDate = (date) => {
+  //   if (date !== undefined) {
+  //     return date
+  //       .slice(8, 10)
+  //       .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
+  //   }
+  // };
 
   function onSubmit(values, event) {
     console.log(values);
@@ -71,7 +71,7 @@ function EntryForm({ token }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formatDate(formData.date),
+        Date: formData.date,                   //formatDate(formData.date),
         Topics: formData.topics,
         NotionLinks: formData.linkNotion,
         AdditionalResourcesLinks: formData.linkUsefulResources, 
