@@ -1,4 +1,3 @@
-import { useForm, useWatch } from "react-hook-form";
 import React, { useState, useEffect, useRef } from "react";
 import S3 from "react-aws-s3";
 import {
@@ -12,16 +11,16 @@ import {
   Heading,
   VStack,
   HStack,
+  IconButton,
 } from "@chakra-ui/react";
-import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
+import { DeleteIcon } from "@chakra-ui/icons";
+
+import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG } from "../../libs/config";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import FormAlertBox from "../FormAlertBox";
-import { useAuth0 } from "@auth0/auth0-react";
 import Editable from "../Editable";
 
-
 function EditForm({ token }) {
-  const { handleSubmit, control, register, formState } = useForm(); //initially was just form state
   const fileInput = React.useRef();
   const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
   var locations = [];
@@ -37,21 +36,19 @@ function EditForm({ token }) {
   // const { user } = useAuth0();
   const [entryDate, setEntryDate] = useState("");
 
- 
   console.log(entryDate);
 
   //!! Change to use reducer
+  const [id, setId] = useState("");
   const [topics, setTopics] = useState("TBA");
   const [recapQuizScore, setRecapQuizScore] = useState("TBA");
   const [notionLinks, setNotionLinks] = useState("TBA");
   const [githubLinks, setGithubLinks] = useState("TBA");
-  const [additionalResourcesLinks, setAdditionalResourcesLinks] = useState("TBA");
+  const [additionalResourcesLinks, setAdditionalResourcesLinks] = useState(
+    "TBA"
+  );
   const [additionalNotes, setAdditionalNotes] = useState("TBA");
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
-
-  // useEffect(() => {
-  //   getEntryByDate();
-  // }, [entryDate]);
 
   async function getEntryByDate() {
     if (entryDate !== undefined) {
@@ -70,16 +67,10 @@ function EditForm({ token }) {
         setAdditionalResourcesLinks(data[0].additionalResourcesLinks);
         setAdditionalNotes(data[0].additionalNotes);
         setUploadedDocuments(data[0].uploadedDocuments);
+        setId(data[0].id);
       }
     }
   }
-
-  const config = {
-    bucketName: process.env.REACT_APP_AWS_BUCKET_NAME,
-    region: process.env.REACT_APP_AWS_REGION,
-    accessKeyId: process.env.REACT_APP_AWS_ID,
-    secretAccessKey: process.env.REACT_APP_AWS_KEY,
-  };
 
   const handleClick = (event) => {
     event.preventDefault();
@@ -91,7 +82,7 @@ function EditForm({ token }) {
 
   const handleUpload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
-    const ReactS3Client = new S3(config);
+    const ReactS3Client = new S3(AWS_S3_CONFIG);
     ReactS3Client.uploadFile(file, newFileName).then((data) => {
       if (data.status === 204) {
         console.log("success");
@@ -103,34 +94,62 @@ function EditForm({ token }) {
     });
   };
 
-  //console.log(uploadedFilesPath);
 
-  function onSubmit(values, event) {
-    console.log(values);
-    //postBooking(values);
-    //event.target.reset();
+  const handleS3Delete = (filename) => {
+    const ReactS3Client = new S3(AWS_S3_CONFIG);
+    ReactS3Client.deleteFile(filename)
+      .then((response) => console.log(response))
+      .catch((err) => console.error(err));
+  };
+
+  const handleDeleteFile = (fileUrl, index) => {
+    console.log("delete button clicked");
+    console.log(fileUrl);
+    console.log(index);
+    console.log(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length));
+    setUploadedDocuments([...uploadedDocuments.slice(0,index), ...uploadedDocuments.slice(index+1)]);
+    handleS3Delete(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length));    //make it that if this is successful only then to we remove the path from uploaded documents. 
   }
+  console.log(uploadedDocuments);
 
-  const postBooking = (formData) => {
-    console.log("in post booking" + uploadedFilesPath);
+  const updateEntry = () => {
     const requestOptions = {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formData.date,
-        Topics: formData.topics,
-        NotionLinks: formData.linkNotion,
-        AdditionalResourcesLinks: formData.linkUsefulResources,
-        GithubLinks: formData.linkGithub,
-        AdditionalNotes: formData.additionalNotes,
-        RecapQuizScore: formData.recapQuizScore,
+        Id: id,
+        Date: entryDate,
+        Topics: topics,
+        NotionLinks: notionLinks,
+        AdditionalResourcesLinks: additionalResourcesLinks,
+        GithubLinks: githubLinks,
+        AdditionalNotes: additionalNotes,
+        RecapQuizScore: recapQuizScore,
         Token: token,
         UploadedDocuments: uploadedFilesPath,
       }),
     };
-  };
 
-  function SelectEditEntry() {
+    fetch(`${BACKEND_URL_DAILY_ENTRIES}/${id}`, requestOptions)
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        }
+        throw new Error("Something went wrong.");
+      })
+      .then(function (text) {
+        console.log("Request successful", text);
+        setIsSuccessfulOpen(true);
+      })
+      .catch(function (error) {
+        console.log("Request failed", error);
+        setIsErrorOpen(true);
+      });
+
+  }
+
+
+  function SelectEditableEntry() {
     if (entryDate !== null && entryDate !== "") {
       setIsDisabled(false);
       getEntryByDate();
@@ -140,13 +159,12 @@ function EditForm({ token }) {
     }
   }
 
-  const [task, setTask] = useState("");
   const inputRef = useRef();
   const [isDisabled, setIsDisabled] = useState(true);
 
   return (
     <Box width="100%">
-      <VStack spacing="3%" alignItems="flex-start"> 
+      <VStack spacing="3%" alignItems="flex-start">
         <VStack alignItems="flex-start">
           <Heading size="md">
             Select the day for which you would like to edit your entry:
@@ -162,7 +180,7 @@ function EditForm({ token }) {
               colorScheme="blue"
               variant="outline"
               size="sm"
-              onClick={SelectEditEntry}
+              onClick={SelectEditableEntry}
             >
               Start Editing
             </Button>
@@ -176,171 +194,190 @@ function EditForm({ token }) {
           <Editable
             text={recapQuizScore}
             placeholder="Enter the test score"
-            type="input"  
+            type="input"
             childRef={inputRef}
             inputWidth="24"
           >
-          <Input
-            type="number"
-            name="recapQuizScore"
-            min={0}
-            max={10}
-            placeholder={recapQuizScore}
-            value={recapQuizScore}
-            onChange={e => setRecapQuizScore(e.target.value)}
-            defaultValue={recapQuizScore}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="24"
-          />
-        </Editable>
+            <Input
+              type="number"
+              name="recapQuizScore"
+              min={0}
+              max={10}
+              placeholder={recapQuizScore}
+              value={recapQuizScore}
+              onChange={(e) => setRecapQuizScore(e.target.value)}
+              defaultValue={recapQuizScore}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="24"
+            />
+          </Editable>
 
           <FormLabel>Topics Covered</FormLabel>
           <Editable
             text={topics}
             placeholder="Enter the topics covered"
-            type="input"  
+            type="input"
             childRef={inputRef}
             size="md"
             inputWidth="8xl"
           >
-          <Input
-            type="text"
-            name="topics"
-            placeholder={topics}
-            value={topics}
-            onChange={e => setTopics(e.target.value)}
-            defaultValue={topics}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="8xl"
-            isRequired
-          />
-        </Editable>
+            <Input
+              type="text"
+              name="topics"
+              placeholder={topics}
+              value={topics}
+              onChange={(e) => setTopics(e.target.value)}
+              defaultValue={topics}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="8xl"
+              isRequired
+            />
+          </Editable>
 
-        <FormLabel>Link(s) to Notion Notes (or similar)</FormLabel>
+          <FormLabel>Link(s) to Notion Notes (or similar)</FormLabel>
           <Editable
             text={notionLinks}
             placeholder="Links to Notion notes or alternative note taking applications eg. https://www.notion.so/Day-27-09-02-21-80fe53a30e254625bab3a9f187936081"
-            type="input"  
+            type="input"
             childRef={inputRef}
             size="md"
             inputWidth="8xl"
           >
-          <Input
-            type="text"
-            name="linkNotion"
-            placeholder={notionLinks}
-            value={notionLinks}
-            onChange={e => setNotionLinks(e.target.value)}
-            defaultValue={notionLinks}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="8xl"
-          />
-        </Editable>
+            <Input
+              type="text"
+              name="linkNotion"
+              placeholder={notionLinks}
+              value={notionLinks}
+              onChange={(e) => setNotionLinks(e.target.value)}
+              defaultValue={notionLinks}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="8xl"
+            />
+          </Editable>
 
-        <FormLabel>Link(s) to GitHub Repositories</FormLabel>
+          <FormLabel>Link(s) to GitHub Repositories</FormLabel>
           <Editable
             text={githubLinks}
             placeholder="Links to relevant GitHub repositories"
-            type="input"  
+            type="input"
             childRef={inputRef}
             size="md"
             inputWidth="8xl"
           >
-          <Input
-            type="text"
-            name="linkGithub"
-            placeholder={githubLinks}
-            value={githubLinks}
-            onChange={e => setGithubLinks(e.target.value)}
-            defaultValue={githubLinks}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="8xl"
-          />
-        </Editable>
-         
-        <FormLabel>Useful Resources Link(s)</FormLabel>
+            <Input
+              type="text"
+              name="linkGithub"
+              placeholder={githubLinks}
+              value={githubLinks}
+              onChange={(e) => setGithubLinks(e.target.value)}
+              defaultValue={githubLinks}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="8xl"
+            />
+          </Editable>
+
+          <FormLabel>Useful Resources Link(s)</FormLabel>
           <Editable
             text={additionalResourcesLinks}
             placeholder="Links to useful resources such as an article, tutorial, etc"
-            type="input"  
+            type="input"
             childRef={inputRef}
             size="md"
             inputWidth="8xl"
           >
-          <Input
-            type="text"
-            name="linkUsefulResources"
-            placeholder={additionalResourcesLinks}
-            value={additionalResourcesLinks}
-            onChange={e => setAdditionalResourcesLinks(e.target.value)}
-            defaultValue={additionalResourcesLinks}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="8xl"
-          />
-        </Editable>
+            <Input
+              type="text"
+              name="linkUsefulResources"
+              placeholder={additionalResourcesLinks}
+              value={additionalResourcesLinks}
+              onChange={(e) => setAdditionalResourcesLinks(e.target.value)}
+              defaultValue={additionalResourcesLinks}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="8xl"
+            />
+          </Editable>
 
-        <FormLabel>Additional Notes</FormLabel>
+          <FormLabel>Additional Notes</FormLabel>
           <Editable
             text={additionalNotes}
             placeholder="Links to useful resources such as an article, tutorial, etc"
-            type="textarea"  
+            type="textarea"
             childRef={inputRef}
             size="md"
             inputWidth="8xl"
           >
-          <Textarea
-            name="linkUsefulResources"
-            placeholder={additionalNotes}
-            value={additionalNotes}
-            onChange={e => setAdditionalNotes(e.target.value)}
-            defaultValue={additionalNotes}
-            disabled={isDisabled}
-            variant="outline"
-            size="md"
-            width="8xl"
-          />
-        </Editable>
+            <Textarea
+              name="linkUsefulResources"
+              placeholder={additionalNotes}
+              value={additionalNotes}
+              onChange={(e) => setAdditionalNotes(e.target.value)}
+              defaultValue={additionalNotes}
+              disabled={isDisabled}
+              variant="outline"
+              size="md"
+              width="8xl"
+            />
+          </Editable>
 
-        <FormLabel>Uploaded Documents (.pdf)</FormLabel> 
-        {uploadedDocuments.map((doc) => {
-                  return (
-                    <Box color="blue.500" size="sm">
-                      <Heading size="sm">{(doc.slice((doc.lastIndexOf('/')+1), doc.length))}</Heading>
-                      <a href={doc} download>
-                        Click here to open the file
-                      </a>
-                    </Box>
-                  );
-                  })}
+          <FormLabel>Uploaded Documents (.pdf)</FormLabel>
           <HStack>
-          <Input
-            type="file"
-            multiple
-            ref={fileInput}
-            size="md"
-            width="min-content"
-            accept=".pdf"
-          />
+            <Input
+              type="file"
+              multiple
+              ref={fileInput}
+              size="md"
+              width="min-content"
+              accept=".pdf"
+              disabled={isDisabled}
+            />
             <Button
-            rightIcon={<FaCloudUploadAlt />}
-            size="sm"
-            colorScheme="blue"
-            variant="outline"
-            onClick={handleClick}
-          >
-            Upload files
-          </Button>
+              rightIcon={<FaCloudUploadAlt />}
+              size="sm"
+              colorScheme="blue"
+              variant="outline"
+              onClick={handleClick}
+              disabled={isDisabled}
+            >
+              Upload Files
+            </Button>
           </HStack>
+          {uploadedDocuments.map((doc, index) => {
+            return (
+                <HStack spacing="9%" colorScheme="blue" color="blue.500" width="8xl">
+                  <Heading size="sm">
+                    {doc.slice(doc.lastIndexOf("/") + 1, doc.length)}
+                  </Heading>
+
+                  <IconButton
+                    variant="outline"
+                    colorScheme="red"
+                    aria-label="Delete File"
+                    icon={<DeleteIcon />}
+                    onClick={()=>handleDeleteFile(doc, index)}
+                  />
+                </HStack>
+            );
+          })}
+          
+        </VStack>
+        <VStack>
+        <Button
+          mt={4}
+          colorScheme="blue"
+          onClick={updateEntry}
+        >
+          Update Entry
+        </Button>
         </VStack>
       </VStack>
     </Box>

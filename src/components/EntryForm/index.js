@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import S3 from "react-aws-s3";
 import { FormLabel, FormControl, FormHelperText, Input, Button, Textarea, Box} from "@chakra-ui/react";
-import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
+import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG} from "../../libs/config";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import FormAlertBox from "../FormAlertBox";
 
@@ -20,13 +20,6 @@ function EntryForm({ token }) {
   };
   const cancelRef = React.useRef();
 
-  const config = {
-    bucketName: process.env.REACT_APP_AWS_BUCKET_NAME,
-    region: process.env.REACT_APP_AWS_REGION,
-    accessKeyId: process.env.REACT_APP_AWS_ID,
-    secretAccessKey: process.env.REACT_APP_AWS_KEY,
-  };
-
   const handleClick = (event) => {
     event.preventDefault();
     let newArr = fileInput.current.files;
@@ -37,7 +30,7 @@ function EntryForm({ token }) {
 
   const handleUpload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
-    const ReactS3Client = new S3(config);
+    const ReactS3Client = new S3(AWS_S3_CONFIG);
     ReactS3Client.uploadFile(file, newFileName).then((data) => {
       if (data.status === 204) {
         console.log("success");
