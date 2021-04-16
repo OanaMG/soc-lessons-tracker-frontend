@@ -25,7 +25,7 @@ function ViewEntryPage() {
         `${BACKEND_URL_DAILY_ENTRIES}?token=${user.sub.slice(
           6,
           user.sub.length
-        )}&date=${formatDate(entryDate)}`
+        )}&date=${entryDate}`
       );
       let data = await response.json();
       console.log(data);
@@ -46,19 +46,11 @@ function ViewEntryPage() {
   function handleClick() {
     if (entryDate !== null && entryDate !== "") {
       getEntryByDate();
-      console.log("date selected " + formatDate(entryDate));
+      console.log("date selected " + entryDate);
     } else {
       console.log("no date added");
     }
   }
-
-  const formatDate = (date) => {
-    if ((date !== undefined) & (date !== null)) {
-      return date
-        .slice(8, 10)
-        .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
-    }
-  };
 
   return (
     <div className={css.bg}>
