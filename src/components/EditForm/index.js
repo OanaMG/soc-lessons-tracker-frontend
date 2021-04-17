@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import S3 from "react-aws-s3";
 import {
   FormLabel,
-  FormControl,
-  FormHelperText,
+  // FormControl,
+  // FormHelperText,
   Input,
   Button,
   Textarea,
@@ -14,42 +14,38 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
-
 import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG } from "../../libs/config";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import FormAlertBox from "../FormAlertBox";
 import Editable from "../Editable";
 
 function EditForm({ token }) {
-  const fileInput = React.useRef();
-  const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
-  var locations = [];
+  const fileInput = useRef();
+  const inputRef = useRef();
+  const cancelRef = useRef();
 
   const [isErrorOpen, setIsErrorOpen] = useState(false);
   const [isSuccessfulOpen, setIsSuccessfulOpen] = useState(false);
-  const onClose = () => {
-    setIsSuccessfulOpen(false);
-    setIsErrorOpen(false);
-  };
-  const cancelRef = React.useRef();
+  const [isDisabled, setIsDisabled] = useState(true);
 
-  // const { user } = useAuth0();
   const [entryDate, setEntryDate] = useState("");
-
-  console.log(entryDate);
-
-  //!! Change to use reducer
   const [id, setId] = useState("");
   const [topics, setTopics] = useState("TBA");
   const [recapQuizScore, setRecapQuizScore] = useState("TBA");
   const [notionLinks, setNotionLinks] = useState("TBA");
   const [githubLinks, setGithubLinks] = useState("TBA");
-  const [additionalResourcesLinks, setAdditionalResourcesLinks] = useState(
-    "TBA"
-  );
+  const [additionalResourcesLinks, setAdditionalResourcesLinks] = useState("TBA");
   const [additionalNotes, setAdditionalNotes] = useState("TBA");
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
+  var locations = [];
+
+  const onClose = () => {
+    setIsSuccessfulOpen(false);
+    setIsErrorOpen(false);
+  };
+
+  
   async function getEntryByDate() {
     if (entryDate !== undefined) {
       let response = await fetch(
@@ -59,8 +55,7 @@ function EditForm({ token }) {
       console.log(data);
 
       if (data[0] !== undefined) {
-        //console.log(data[0].uploadedDocuments[0]);
-        setTopics(data[0].topics); //!! to change to useReducer
+        setTopics(data[0].topics); 
         setRecapQuizScore(data[0].recapQuizScore);
         setNotionLinks(data[0].notionLinks);
         setGithubLinks(data[0].githubLinks);
@@ -72,28 +67,27 @@ function EditForm({ token }) {
     }
   }
 
-  const handleClick = (event) => {
-    event.preventDefault();
-    let newArr = fileInput.current.files;
-    for (let i = 0; i < newArr.length; i++) {
-      handleUpload(newArr[i]);
-    }
-  };
-
-  const handleUpload = (file) => {
+  const handleS3Upload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
     const ReactS3Client = new S3(AWS_S3_CONFIG);
     ReactS3Client.uploadFile(file, newFileName).then((data) => {
       if (data.status === 204) {
         console.log("success");
         locations.push(data.location);
-        setUploadedFilesPath(locations);
+        setUploadedDocuments([...uploadedDocuments, ...locations]);
       } else {
         console.log("fail");
       }
     });
   };
 
+  const handleUploadFiles = (event) => {
+    event.preventDefault();
+    let newArr = fileInput.current.files;
+    for (let i = 0; i < newArr.length; i++) {
+      handleS3Upload(newArr[i]);
+    }
+  };
 
   const handleS3Delete = (filename) => {
     const ReactS3Client = new S3(AWS_S3_CONFIG);
@@ -103,14 +97,17 @@ function EditForm({ token }) {
   };
 
   const handleDeleteFile = (fileUrl, index) => {
-    console.log("delete button clicked");
-    console.log(fileUrl);
-    console.log(index);
-    console.log(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length));
     setUploadedDocuments([...uploadedDocuments.slice(0,index), ...uploadedDocuments.slice(index+1)]);
     handleS3Delete(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length));    //make it that if this is successful only then to we remove the path from uploaded documents. 
   }
-  console.log(uploadedDocuments);
+  
+  //console.log(uploadedDocuments);
+  const SelectEditableEntry = () => {
+    if (entryDate !== null && entryDate !== "") {
+      setIsDisabled(false);
+      getEntryByDate();
+    };
+  }
 
   const updateEntry = () => {
     const requestOptions = {
@@ -126,7 +123,7 @@ function EditForm({ token }) {
         AdditionalNotes: additionalNotes,
         RecapQuizScore: recapQuizScore,
         Token: token,
-        UploadedDocuments: uploadedFilesPath,
+        UploadedDocuments: uploadedDocuments,
       }),
     };
 
@@ -145,22 +142,7 @@ function EditForm({ token }) {
         console.log("Request failed", error);
         setIsErrorOpen(true);
       });
-
   }
-
-
-  function SelectEditableEntry() {
-    if (entryDate !== null && entryDate !== "") {
-      setIsDisabled(false);
-      getEntryByDate();
-      console.log("date selected " + entryDate);
-    } else {
-      console.log("no date added");
-    }
-  }
-
-  const inputRef = useRef();
-  const [isDisabled, setIsDisabled] = useState(true);
 
   return (
     <Box width="100%">
@@ -345,7 +327,7 @@ function EditForm({ token }) {
               size="sm"
               colorScheme="blue"
               variant="outline"
-              onClick={handleClick}
+              onClick={handleUploadFiles}
               disabled={isDisabled}
             >
               Upload Files
@@ -380,6 +362,22 @@ function EditForm({ token }) {
         </Button>
         </VStack>
       </VStack>
+
+      <FormAlertBox
+        cancelRef={cancelRef}
+        onClose={onClose}
+        isOpen={isErrorOpen}
+        headerText="Oops!"
+        bodyText="There's been an issue updating this entry! Please make sure there is already an entry for the selected date, if not you should use the Add Entry page"
+      />
+
+      <FormAlertBox
+        cancelRef={cancelRef}
+        onClose={onClose}
+        isOpen={isSuccessfulOpen}
+        headerText="Congratulations!"
+        bodyText="This entry has been successfully updated!"
+      />
     </Box>
   );
 }
