@@ -8,11 +8,11 @@ function EntriesTable({data}) {
       const columns = React.useMemo(
         () => [
           {
-            Header: "Date",
+            Header: "Date (YYYY-MM-DD)",
             accessor: "date",
           },
           {
-            Header: "Topic",
+            Header: "Topics Covered",
             accessor: "topics",
           },
         ],
