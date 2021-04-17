@@ -217,7 +217,6 @@ function EditForm({ token }) {
               variant="outline"
               size="md"
               width="8xl"
-              isRequired
             />
           </Editable>
 
