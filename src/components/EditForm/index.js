@@ -358,7 +358,7 @@ function EditForm({ token }) {
           })}
         </VStack>
         <VStack>
-          <Button mt={4} colorScheme="blue" onClick={updateEntry}>
+          <Button mt={4} colorScheme="blue" onClick={updateEntry} disabled={isDisabled}>
             Update Entry
           </Button>
         </VStack>
