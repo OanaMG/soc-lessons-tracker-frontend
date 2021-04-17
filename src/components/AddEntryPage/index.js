@@ -1,28 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import css from "./addEntryPage.module.css";
 import {Heading, HStack, VStack, Stack,} from "@chakra-ui/react";
 import UserProfile from "../UserProfile";
 import EntryForm from "../EntryForm";
-
-import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
 import { useAuth0 } from "@auth0/auth0-react";
 
 function AddEntryPage2() {
   const { user } = useAuth0();
-  //!!! working with just the part after | in the auth0 token
-  console.log(user.sub);
-  console.log((user.sub).slice(6,(user.sub).length));
-  // console.log("Files path from addEntry: " + uploadedFilesPath);
-
-  useEffect(() => {
-    async function getEntries() {
-      let response = await fetch(`${BACKEND_URL_DAILY_ENTRIES}`);
-      let data = await response.json();
-      console.log(data);
-    }
-    getEntries();
-  }, []);
-
+ 
   return (
     <div className={css.bg}>
       <Stack

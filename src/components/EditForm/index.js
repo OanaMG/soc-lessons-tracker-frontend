@@ -40,12 +40,6 @@ function EditForm({ token }) {
 
   var locations = [];
 
-  const onClose = () => {
-    setIsSuccessfulOpen(false);
-    setIsErrorOpen(false);
-  };
-
-  
   async function getEntryByDate() {
     if (entryDate !== undefined) {
       let response = await fetch(
@@ -55,7 +49,7 @@ function EditForm({ token }) {
       console.log(data);
 
       if (data[0] !== undefined) {
-        setTopics(data[0].topics); 
+        setTopics(data[0].topics);
         setRecapQuizScore(data[0].recapQuizScore);
         setNotionLinks(data[0].notionLinks);
         setGithubLinks(data[0].githubLinks);
@@ -63,9 +57,15 @@ function EditForm({ token }) {
         setAdditionalNotes(data[0].additionalNotes);
         setUploadedDocuments(data[0].uploadedDocuments);
         setId(data[0].id);
+        setIsDisabled(false);
       }
     }
   }
+
+  const onClose = () => {
+    setIsSuccessfulOpen(false);
+    setIsErrorOpen(false);
+  };
 
   const handleS3Upload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
@@ -97,17 +97,18 @@ function EditForm({ token }) {
   };
 
   const handleDeleteFile = (fileUrl, index) => {
-    setUploadedDocuments([...uploadedDocuments.slice(0,index), ...uploadedDocuments.slice(index+1)]);
-    handleS3Delete(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length));    //make it that if this is successful only then to we remove the path from uploaded documents. 
-  }
-  
-  //console.log(uploadedDocuments);
-  const SelectEditableEntry = () => {
+    setUploadedDocuments([
+      ...uploadedDocuments.slice(0, index),
+      ...uploadedDocuments.slice(index + 1),
+    ]);
+    handleS3Delete(fileUrl.slice(fileUrl.lastIndexOf("/") + 1, fileUrl.length)); //make it that if this is successful only then to we remove the path from uploaded documents.
+  };
+
+  const selectEditableEntry = () => {
     if (entryDate !== null && entryDate !== "") {
-      setIsDisabled(false);
       getEntryByDate();
-    };
-  }
+    }
+  };
 
   const updateEntry = () => {
     const requestOptions = {
@@ -142,7 +143,7 @@ function EditForm({ token }) {
         console.log("Request failed", error);
         setIsErrorOpen(true);
       });
-  }
+  };
 
   return (
     <Box width="100%">
@@ -162,7 +163,7 @@ function EditForm({ token }) {
               colorScheme="blue"
               variant="outline"
               size="sm"
-              onClick={SelectEditableEntry}
+              onClick={selectEditableEntry}
             >
               Start Editing
             </Button>
@@ -335,31 +336,31 @@ function EditForm({ token }) {
           </HStack>
           {uploadedDocuments.map((doc, index) => {
             return (
-                <HStack spacing="9%" colorScheme="blue" color="blue.500" width="8xl">
-                  <Heading size="sm">
-                    {doc.slice(doc.lastIndexOf("/") + 1, doc.length)}
-                  </Heading>
+              <HStack
+                spacing="9%"
+                colorScheme="blue"
+                color="blue.500"
+                width="8xl"
+              >
+                <Heading size="sm">
+                  {doc.slice(doc.lastIndexOf("/") + 1, doc.length)}
+                </Heading>
 
-                  <IconButton
-                    variant="outline"
-                    colorScheme="red"
-                    aria-label="Delete File"
-                    icon={<DeleteIcon />}
-                    onClick={()=>handleDeleteFile(doc, index)}
-                  />
-                </HStack>
+                <IconButton
+                  variant="outline"
+                  colorScheme="red"
+                  aria-label="Delete File"
+                  icon={<DeleteIcon />}
+                  onClick={() => handleDeleteFile(doc, index)}
+                />
+              </HStack>
             );
           })}
-          
         </VStack>
         <VStack>
-        <Button
-          mt={4}
-          colorScheme="blue"
-          onClick={updateEntry}
-        >
-          Update Entry
-        </Button>
+          <Button mt={4} colorScheme="blue" onClick={updateEntry}>
+            Update Entry
+          </Button>
         </VStack>
       </VStack>
 
