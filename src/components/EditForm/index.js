@@ -1,21 +1,9 @@
 import React, { useState, useRef } from "react";
 import S3 from "react-aws-s3";
-import {
-  FormLabel,
-  // FormControl,
-  // FormHelperText,
-  Input,
-  Button,
-  Textarea,
-  Box,
-  Heading,
-  VStack,
-  HStack,
-  IconButton,
-} from "@chakra-ui/react";
+import {FormLabel, Input, Button, Textarea, Box, Heading, VStack, HStack, IconButton,} from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG } from "../../libs/config";
 import { FaCloudUploadAlt } from "react-icons/fa";
+import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG } from "../../libs/config";
 import FormAlertBox from "../FormAlertBox";
 import Editable from "../Editable";
 
@@ -48,24 +36,17 @@ function EditForm({ token }) {
       let data = await response.json();
       console.log(data);
 
-      if (data[0] !== undefined) {
-        setTopics(data[0].topics);
-        setRecapQuizScore(data[0].recapQuizScore);
-        setNotionLinks(data[0].notionLinks);
-        setGithubLinks(data[0].githubLinks);
-        setAdditionalResourcesLinks(data[0].additionalResourcesLinks);
-        setAdditionalNotes(data[0].additionalNotes);
-        setUploadedDocuments(data[0].uploadedDocuments);
-        setId(data[0].id);
-        setIsDisabled(false);
-      }
-    }
+      setTopics(data.topics);
+      setRecapQuizScore(data.recapQuizScore);
+      setNotionLinks(data.notionLinks);
+      setGithubLinks(data.githubLinks);
+      setAdditionalResourcesLinks(data.additionalResourcesLinks);
+      setAdditionalNotes(data.additionalNotes);
+      setUploadedDocuments(data.uploadedDocuments);
+      setId(data.id);
+      setIsDisabled(false);
+    } 
   }
-
-  const onClose = () => {
-    setIsSuccessfulOpen(false);
-    setIsErrorOpen(false);
-  };
 
   const handleS3Upload = (file) => {
     let newFileName = file.name.replace(/\..+$/, "");
@@ -143,6 +124,11 @@ function EditForm({ token }) {
         console.log("Request failed", error);
         setIsErrorOpen(true);
       });
+  };
+
+  const onClose = () => {
+    setIsSuccessfulOpen(false);
+    setIsErrorOpen(false);
   };
 
   return (

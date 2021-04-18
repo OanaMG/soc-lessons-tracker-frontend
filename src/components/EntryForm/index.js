@@ -42,15 +42,6 @@ function EntryForm({ token }) {
     });
   };
 
-  console.log(uploadedFilesPath);
-
-  // const formatDate = (date) => {
-  //   if (date !== undefined) {
-  //     return date
-  //       .slice(8, 10)
-  //       .concat(`-${date.slice(5, 7)}-${date.slice(0, 4)}`);
-  //   }
-  // };
 
   function onSubmit(values, event) {
     console.log(values);
@@ -59,12 +50,12 @@ function EntryForm({ token }) {
   }
 
   const postBooking = (formData) => {
-    console.log("in post booking" + uploadedFilesPath);
+    //console.log("in post booking" + uploadedFilesPath);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Date: formData.date,                   //formatDate(formData.date),
+        Date: formData.date,                   
         Topics: formData.topics,
         NotionLinks: formData.linkNotion,
         AdditionalResourcesLinks: formData.linkUsefulResources, 
@@ -107,7 +98,7 @@ function EntryForm({ token }) {
         </FormControl>
 
         {/* For some reason the score input is taken as required and not sure why. Needs to be sorted out as the form can't be submitted without a score at the moment */}
-        <FormControl>
+        <FormControl isRequired>
           <FormLabel>Daily Quiz Score</FormLabel>
           <Input
             name="recapQuizScore"
