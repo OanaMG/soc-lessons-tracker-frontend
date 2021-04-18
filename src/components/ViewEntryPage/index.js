@@ -10,7 +10,6 @@ function ViewEntryPage() {
   const { user } = useAuth0();
   const [entryDate, setEntryDate] = useState("");
   
-  //!! Change to use reducer
   const [topics, setTopics] = useState("TBA");
   const [recapQuizScore, setRecapQuizScore] = useState("TBA");
   const [notionLinks, setNotionLinks] = useState("TBA");
@@ -30,19 +29,16 @@ function ViewEntryPage() {
       let data = await response.json();
       console.log(data);
 
-      if (data[0] !== undefined) {
-        console.log(data[0].uploadedDocuments[0]);
-
-        setTopics(data[0].topics); //!! to change to useReducer
-        setRecapQuizScore(data[0].recapQuizScore);
-        setNotionLinks(data[0].notionLinks);
-        setGithubLinks(data[0].githubLinks);
-        setAdditionalResourcesLinks(data[0].additionalResourcesLinks);
-        setAdditionalNotes(data[0].additionalNotes);
-        setUploadedDocuments(data[0].uploadedDocuments);
-      }
+      setTopics(data.topics); 
+      setRecapQuizScore(data.recapQuizScore);
+      setNotionLinks(data.notionLinks);
+      setGithubLinks(data.githubLinks);
+      setAdditionalResourcesLinks(data.additionalResourcesLinks);
+      setAdditionalNotes(data.additionalNotes);
+      setUploadedDocuments(data.uploadedDocuments);
     }
   }
+
   function handleClick() {
     if (entryDate !== null && entryDate !== "") {
       getEntryByDate();
