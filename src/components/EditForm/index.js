@@ -354,7 +354,7 @@ function EditForm({ token }) {
         onClose={onClose}
         isOpen={isErrorOpen}
         headerText="Oops!"
-        bodyText="There's been an issue updating this entry! Please make sure there is already an entry for the selected date, if not you should use the Add Entry page"
+        bodyText="There's been an issue updating this entry! Please make sure there is already an entry for the selected date and the Daily Quiz Score and Topics Covered fields are not empty"
       />
 
       <FormAlertBox
