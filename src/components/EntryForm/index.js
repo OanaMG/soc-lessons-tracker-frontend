@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import S3 from "react-aws-s3";
 import { FormLabel, FormControl, FormHelperText, Input, Button, Textarea, Box} from "@chakra-ui/react";
 import { BACKEND_URL_DAILY_ENTRIES, AWS_S3_CONFIG} from "../../libs/config";
@@ -7,8 +7,8 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import FormAlertBox from "../FormAlertBox";
 
 function EntryForm({ token }) {
-  const { handleSubmit, register, formState } = useForm(); //initially was just form state
-  const fileInput = React.useRef();
+  const { handleSubmit, register, formState } = useForm(); 
+  const fileInput = useRef();
   const [uploadedFilesPath, setUploadedFilesPath] = useState([]);
   var locations = [];
 
@@ -18,7 +18,7 @@ function EntryForm({ token }) {
     setIsSuccessfulOpen(false);
     setIsErrorOpen(false);
   };
-  const cancelRef = React.useRef();
+  const cancelRef = useRef();
 
   const handleClick = (event) => {
     event.preventDefault();
@@ -41,7 +41,6 @@ function EntryForm({ token }) {
       }
     });
   };
-
 
   function onSubmit(values, event) {
     console.log(values);
@@ -97,7 +96,6 @@ function EntryForm({ token }) {
           />
         </FormControl>
 
-        {/* For some reason the score input is taken as required and not sure why. Needs to be sorted out as the form can't be submitted without a score at the moment */}
         <FormControl isRequired>
           <FormLabel>Daily Quiz Score</FormLabel>
           <Input

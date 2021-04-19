@@ -3,16 +3,8 @@ import { Input, Box, Textarea } from "@chakra-ui/react";
 
 // Component accept text, placeholder values and also pass what type of Input - input, textarea so that we can use it for styling accordingly
 // Manage the state whether to show the label or the input box. By default, label will be shown.
+function Editable({childRef, text, type, placeholder, children, inputWidth, ...props}) {
 
-const Editable = ({
-  childRef,
-  text,
-  type,
-  placeholder,
-  children,
-  inputWidth,
-  ...props
-}) => {
   const [isEditing, setEditing] = useState(false);
 
   /* 
@@ -45,7 +37,6 @@ const Editable = ({
   };
 
   /*
-- It will display a label is `isEditing` is false
 - It will display the children (input or textarea) if `isEditing` is true
 - when input `onBlur`, we will set the default non edit mode
 */

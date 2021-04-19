@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import { Table, Thead, Tbody, Tr, Th, Td, chakra, Flex, IconButton, Text, Tooltip, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper} from "@chakra-ui/react"
 import { TriangleDownIcon, TriangleUpIcon, ArrowRightIcon, ArrowLeftIcon, ChevronRightIcon, ChevronLeftIcon } from "@chakra-ui/icons"
 import { useTable, useSortBy, usePagination } from "react-table";
 
 
 function EntriesTable({data}) {
-      const columns = React.useMemo(
+      const columns = useMemo(
         () => [
           {
             Header: "Date (YYYY-MM-DD)",
