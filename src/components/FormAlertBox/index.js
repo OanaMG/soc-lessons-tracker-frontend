@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogFooter,
-} from "@chakra-ui/react";
+import {AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogCloseButton, AlertDialogFooter} from "@chakra-ui/react";
 
 function FormAlertBox({ cancelRef, onClose, isOpen, headerText, bodyText }) {
   return (

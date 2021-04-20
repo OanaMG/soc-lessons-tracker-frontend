@@ -1,25 +1,8 @@
 import React, { useState, useEffect } from "react";
 import UserProfile from "../UserProfile";
 import css from "./homePage.module.css";
-import {
-  Heading,
-  HStack,
-  VStack,
-  Input,
-  Stack,
-  UnorderedList,
-  Grid,
-  GridItem,
-} from "@chakra-ui/react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import {Heading, HStack, VStack, Input, Stack, UnorderedList, Grid, GridItem} from "@chakra-ui/react";
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from "recharts";
 import EntriesTable from "../EntriesTable";
 import { BACKEND_URL_DAILY_ENTRIES } from "../../libs/config";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -29,10 +12,9 @@ function HomePage() {
   const [search, setSearch] = useState("");
   const [searchEntries, setSearchEntries] = useState(entries);
   const { user } = useAuth0();
-  //!!! working with just the part after | in the auth0 token
+  
   console.log(user.sub);
   console.log(user.sub.slice(6, user.sub.length));
-  //console.log();
 
   useEffect(() => {
     getUserEntries();
@@ -114,19 +96,6 @@ function HomePage() {
           <VStack display="flex" spacing="5%">
             <VStack display="flex">
               <Heading size="md">Test Score Graph</Heading>
-              {/* <LineChart
-                                width={400}
-                                height={500}
-                                data={notes}
-                                margin={{top:20, right:10, bottom:20, left:10}}   
-                            />
-                            <Line type="monotone" dataKey="score" stroke="#000000"/>
-                            <CartesianGrid stroke="#000000" strokeDasharray="3 3"/>
-                            <XAxis dataKey="date" tick={{fill: "#282c34"}} tickLine={{stroke: "#000000"}}>
-                                <Label value="Date" position="bottom" offset={0}/>
-                            </XAxis>
-                            <YAxis type="number" domain={[0,10]}/> */}
-
               <LineChart
                 width={730}
                 height={250}
@@ -134,9 +103,7 @@ function HomePage() {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                {/* <XAxis dataKey="date"> */}
                 <XAxis dataKey="date">
-                  {/* <Label value="Date" position="bottom" offset={0}/> */}
                 </XAxis>
                 <YAxis />
                 <Tooltip />
