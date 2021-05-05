@@ -126,9 +126,35 @@ function EditForm({ token }) {
       });
   };
 
+  //the entry is being deleted but need to also delete the file from s3
+  const deleteEntry = () => {
+    uploadedDocuments.map((doc) => {
+      return handleS3Delete(doc.slice(doc.lastIndexOf("/") + 1, doc.length));
+    });
+
+    fetch(`${BACKEND_URL_DAILY_ENTRIES}/${id}`, {
+      method: "DELETE",
+    })
+     .then(function(response) {
+       if (response.ok){
+         return response.text();
+       }
+       throw new Error("Something went wrong.");
+     })
+     .then(function (text) {
+      console.log("Request successful", text);
+      setIsSuccessfulOpen(true);
+    })
+     .catch(function (error) {
+      console.log("Request failed", error);
+      setIsErrorOpen(true);
+    });
+  };
+
   const onClose = () => {
     setIsSuccessfulOpen(false);
     setIsErrorOpen(false);
+    //window.location.reload();  need to reset the form
   };
 
   return (
@@ -342,11 +368,20 @@ function EditForm({ token }) {
             );
           })}
         </VStack>
-        <VStack>
-          <Button mt={4} colorScheme="blue" onClick={updateEntry} disabled={isDisabled}>
-            Update Entry
-          </Button>
-        </VStack>
+      
+        <HStack width="8xl" display="flex" justify="space-between" alignItems="center" paddingBottom="1%"> 
+          <VStack>
+            <Button mt={4} colorScheme="blue" onClick={updateEntry} disabled={isDisabled}>
+              Update Entry
+            </Button>
+          </VStack>
+          <VStack>
+            <Button mt={4} colorScheme="red" onClick={deleteEntry} disabled={isDisabled}>
+              Delete Entry
+            </Button>
+          </VStack>
+          </HStack>
+      
       </VStack>
 
       <FormAlertBox
@@ -354,7 +389,7 @@ function EditForm({ token }) {
         onClose={onClose}
         isOpen={isErrorOpen}
         headerText="Oops!"
-        bodyText="There's been an issue updating this entry! Please make sure there is already an entry for the selected date and the Daily Quiz Score and Topics Covered fields are not empty"
+        bodyText="There's been an issue updating/deleting this entry! Please make sure there is already an entry for the selected date and the Daily Quiz Score and Topics Covered fields are not empty"
       />
 
       <FormAlertBox
@@ -362,7 +397,7 @@ function EditForm({ token }) {
         onClose={onClose}
         isOpen={isSuccessfulOpen}
         headerText="Congratulations!"
-        bodyText="This entry has been successfully updated!"
+        bodyText="This entry has been successfully updated/deleted!"
       />
     </Box>
   );
